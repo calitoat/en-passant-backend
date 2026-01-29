@@ -1,21 +1,44 @@
 /**
- * Trust Score Calculation Service
+ * Trust Score Calculation Service (EP Score)
  *
- * Simple scoring model for shipping fast:
- * - Base account: 30 points
- * - Gmail connected: +30 points
- * - LinkedIn connected: +40 points
- * - .edu email bonus: +15 points
- * - Max score: 115 points (100 base + 15 edu bonus)
+ * Scoring model:
+ * - Base account: 20 points
+ * - Gmail connected: +25 points
+ * - LinkedIn connected: +30 points
+ * - .edu email bonus: +25 points
+ * - Max score: 100 points
  */
 
 // === SCORING POINTS ===
 const POINTS = {
-    BASE: 30,        // Having a TrustBridge account
-    GMAIL: 30,       // Gmail OAuth connected
-    LINKEDIN: 40,    // LinkedIn OAuth connected
-    EDU_BONUS: 15    // Educational institution email bonus
+    BASE: 20,        // Having an En Passant account
+    GMAIL: 25,       // Gmail OAuth connected
+    LINKEDIN: 30,    // LinkedIn OAuth connected
+    EDU_BONUS: 25    // Educational institution email bonus
 };
+
+const MAX_SCORE = 100;
+
+// === CLEARANCE LEVELS ===
+const CLEARANCE_LEVELS = {
+    GRANDMASTER: { level: 4, title: 'Grandmaster', color: 'gold', minScore: 100 },
+    MASTER: { level: 3, title: 'Master', color: 'emerald', minScore: 75 },
+    PLAYER: { level: 2, title: 'Player', color: 'blue', minScore: 50 },
+    SPECTATOR: { level: 1, title: 'Spectator', color: 'gray', minScore: 0 }
+};
+
+/**
+ * Get clearance level based on EP Score
+ *
+ * @param {number} score - EP Score (0-100)
+ * @returns {Object} { level, title, color }
+ */
+export function getClearanceLevel(score) {
+    if (score >= 100) return CLEARANCE_LEVELS.GRANDMASTER;
+    if (score >= 75) return CLEARANCE_LEVELS.MASTER;
+    if (score >= 50) return CLEARANCE_LEVELS.PLAYER;
+    return CLEARANCE_LEVELS.SPECTATOR;
+}
 
 /**
  * Check if an email is from an educational institution
@@ -44,10 +67,10 @@ export function isEducationalEmail(email) {
  */
 export function calculateTrustScore(anchors) {
     const breakdown = {
-        base: { score: POINTS.BASE, label: 'TrustBridge Account' },
+        base: { score: POINTS.BASE, label: 'En Passant Account' },
         gmail: { score: 0, label: 'Gmail Connected' },
         linkedin: { score: 0, label: 'LinkedIn Connected' },
-        edu_bonus: { score: 0, label: 'Educational Email Verified' }
+        edu_bonus: { score: 0, label: '.edu Email Verified' }
     };
 
     let eduVerified = false;
@@ -72,9 +95,14 @@ export function calculateTrustScore(anchors) {
         }
     }
 
-    const score = breakdown.base.score + breakdown.gmail.score + breakdown.linkedin.score + breakdown.edu_bonus.score;
+    const score = Math.min(
+        breakdown.base.score + breakdown.gmail.score + breakdown.linkedin.score + breakdown.edu_bonus.score,
+        MAX_SCORE
+    );
 
-    return { score, breakdown, eduVerified };
+    const clearance = getClearanceLevel(score);
+
+    return { score, breakdown, eduVerified, clearance };
 }
 
 /**
@@ -87,5 +115,6 @@ export function getScoringWeights() {
 export default {
     calculateTrustScore,
     getScoringWeights,
+    getClearanceLevel,
     isEducationalEmail
 };

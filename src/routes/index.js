@@ -10,6 +10,7 @@ import identityRoutes from './identity.routes.js';
 import userRoutes from './user.routes.js';
 import badgeRoutes from './badge.routes.js';
 import waitlistRoutes from './waitlist.routes.js';
+import verifyRoutes from './verify.routes.js';
 import db from '../db/index.js';
 import config from '../config/index.js';
 import { ALLOWED_ORIGINS } from '../config/cors.js';
@@ -22,6 +23,7 @@ router.use('/identity', identityRoutes);
 router.use('/user', userRoutes);
 router.use('/badges', badgeRoutes);
 router.use('/waitlist', waitlistRoutes);
+router.use('/verify', verifyRoutes);
 
 // Enhanced health check endpoint
 router.get('/health', async (req, res) => {
@@ -76,6 +78,9 @@ router.get('/health', async (req, res) => {
             user: {
                 score: 'GET /api/user/score (auth required)',
                 profile: 'GET /api/user/profile (auth required)'
+            },
+            verify: {
+                publicProfile: 'GET /api/verify/:username (public)'
             }
         }
     });

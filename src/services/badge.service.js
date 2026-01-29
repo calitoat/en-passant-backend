@@ -26,8 +26,8 @@ export async function generateBadge(userId) {
         throw new ValidationError('Cannot generate badge: no identity anchors connected');
     }
 
-    // Calculate trust score
-    const { score, breakdown, eduVerified } = trustScoreService.calculateTrustScore(anchors);
+    // Calculate trust score and clearance level
+    const { score, breakdown, eduVerified, clearance } = trustScoreService.calculateTrustScore(anchors);
 
     // Generate badge token and timestamps
     const badgeToken = cryptoService.generateBadgeToken();
@@ -37,10 +37,11 @@ export async function generateBadge(userId) {
     // Create the badge payload (this is what gets signed)
     const badgePayload = {
         sub: userId,           // Subject (user ID)
-        iss: 'trustbridge',    // Issuer
+        iss: 'enpassant.io',   // Issuer
         iat: Math.floor(issuedAt.getTime() / 1000),  // Issued at (Unix timestamp)
         exp: Math.floor(expiresAt.getTime() / 1000), // Expires at (Unix timestamp)
         trust_score: score,
+        clearance_level: clearance.level,  // Clearance level (1-4)
         badge_token: badgeToken,
         edu_verified: eduVerified  // Whether user has verified .edu email
     };
