@@ -10,7 +10,12 @@ export const ALLOWED_ORIGINS = [
     'http://localhost:5173',      // Frontend dev server
     'http://localhost:3000',      // Backend (for same-origin)
 
-    // Production - TrustBridge domains
+    // Production - En Passant domains
+    'https://enpassantapi.io',
+    'https://www.enpassantapi.io',
+    'https://api.enpassantapi.io',
+
+    // Production - TrustBridge domains (legacy)
     'https://trustbridge.io',
     'https://www.trustbridge.io',
     'https://api.trustbridge.io',
@@ -24,6 +29,7 @@ export const ALLOWED_ORIGINS = [
     // Production - Vercel deployments
     'https://trustbridge.vercel.app',
     'https://trustbridge-frontend.vercel.app',
+    'https://en-passant-frontend.vercel.app',
 
     // Production - Railway deployments
     'https://trustbridge-api.up.railway.app',
