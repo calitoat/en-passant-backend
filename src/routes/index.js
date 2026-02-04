@@ -11,6 +11,10 @@ import userRoutes from './user.routes.js';
 import badgeRoutes from './badge.routes.js';
 import waitlistRoutes from './waitlist.routes.js';
 import verifyRoutes from './verify.routes.js';
+import listingsRoutes from './listings.routes.js';
+import eventsRoutes from './events.routes.js';
+import receiptsRoutes from './receipts.routes.js';
+import inviteRoutes from './invite.routes.js';
 import db from '../db/index.js';
 import config from '../config/index.js';
 import { ALLOWED_ORIGINS } from '../config/cors.js';
@@ -24,6 +28,10 @@ router.use('/user', userRoutes);
 router.use('/badges', badgeRoutes);
 router.use('/waitlist', waitlistRoutes);
 router.use('/verify', verifyRoutes);
+router.use('/listings', listingsRoutes);
+router.use('/events', eventsRoutes);
+router.use('/receipts', receiptsRoutes);
+router.use('/invites', inviteRoutes);
 
 // Enhanced health check endpoint
 router.get('/health', async (req, res) => {
@@ -81,6 +89,31 @@ router.get('/health', async (req, res) => {
             },
             verify: {
                 publicProfile: 'GET /api/verify/:username (public)'
+            },
+            listings: {
+                create: 'POST /api/listings (auth required)',
+                browse: 'GET /api/listings (public)',
+                get: 'GET /api/listings/:id (public)',
+                update: 'PUT /api/listings/:id (auth required)',
+                flag: 'POST /api/listings/:id/flag (auth required)'
+            },
+            events: {
+                list: 'GET /api/events (public)',
+                get: 'GET /api/events/:id (public)',
+                setCeilings: 'POST /api/events/:id/price-ceilings (auth required)'
+            },
+            receipts: {
+                upload: 'POST /api/receipts/upload (auth required)',
+                get: 'GET /api/receipts/:id (auth required)',
+                verify: 'POST /api/receipts/:id/verify (auth required)'
+            },
+            invites: {
+                validate: 'POST /api/invites/validate (public)',
+                redeem: 'POST /api/invites/redeem (auth required)',
+                myCodes: 'GET /api/invites/my-codes (auth required)',
+                betaStatus: 'GET /api/invites/beta-status (auth required)',
+                generateQR: 'POST /api/invites/generate-qr (admin only)',
+                qrStats: 'GET /api/invites/qr-stats (admin only)'
             }
         }
     });

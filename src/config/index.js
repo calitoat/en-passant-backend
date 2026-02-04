@@ -50,11 +50,13 @@ const config = {
     // Badge settings
     badgeExpiryDays: parseInt(optionalEnv('BADGE_EXPIRY_DAYS', '7'), 10),
 
-    // Google OAuth
+    // Google OAuth & Cloud
     google: {
         clientId: optionalEnv('GOOGLE_CLIENT_ID', ''),
         clientSecret: optionalEnv('GOOGLE_CLIENT_SECRET', ''),
-        callbackUrl: optionalEnv('GOOGLE_CALLBACK_URL', 'http://localhost:3000/api/auth/google/callback')
+        callbackUrl: optionalEnv('GOOGLE_CALLBACK_URL', 'http://localhost:3000/api/auth/google/callback'),
+        credentialsPath: optionalEnv('GOOGLE_CLOUD_CREDENTIALS', ''),
+        credentialsJson: optionalEnv('GOOGLE_CLOUD_CREDENTIALS_JSON', '')
     },
 
     // LinkedIn OAuth
@@ -68,7 +70,15 @@ const config = {
     sessionSecret: optionalEnv('SESSION_SECRET', 'dev-session-secret-change-in-production'),
 
     // Frontend URL (for OAuth redirects)
-    frontendUrl: optionalEnv('FRONTEND_URL', 'http://localhost:5173')
+    frontendUrl: optionalEnv('FRONTEND_URL', 'http://localhost:5173'),
+
+    // AWS S3 Configuration
+    aws: {
+        accessKeyId: optionalEnv('AWS_ACCESS_KEY_ID', ''),
+        secretAccessKey: optionalEnv('AWS_SECRET_ACCESS_KEY', ''),
+        region: optionalEnv('AWS_REGION', 'us-east-1'),
+        s3Bucket: optionalEnv('AWS_S3_BUCKET', 'enpassant-receipts')
+    }
 };
 
 export default config;

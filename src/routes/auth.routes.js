@@ -11,6 +11,7 @@ import { Router } from 'express';
 import passport from 'passport';
 import authService from '../services/auth.service.js';
 import identityService from '../services/identity.service.js';
+import inviteService from '../services/invite.service.js';
 import { isEducationalEmail } from '../services/trustScore.service.js';
 import { requireFields } from '../middleware/validate.js';
 import { authenticate } from '../middleware/authenticate.js';
@@ -21,19 +22,55 @@ const router = Router();
 /**
  * POST /api/auth/register
  * Register a new user account
+ *
+ * Body:
+ * - email: required
+ * - password: required
+ * - inviteCode: optional - if valid, grants immediate beta access + 2 invite codes
  */
 router.post('/register', requireFields('email', 'password'), async (req, res, next) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, inviteCode } = req.body;
+
+        // If invite code provided, validate it first (before creating user)
+        let inviteValidation = null;
+        if (inviteCode) {
+            inviteValidation = await inviteService.validateCode(inviteCode);
+            if (!inviteValidation.valid) {
+                return res.status(400).json({
+                    error: 'invalid_invite_code',
+                    message: inviteValidation.error
+                });
+            }
+        }
+
+        // Register the user
         const user = await authService.register(email, password);
 
         // Generate token for immediate use
         const token = authService.generateToken(user);
 
+        // If valid invite code was provided, redeem it
+        let betaAccess = null;
+        if (inviteCode && inviteValidation?.valid) {
+            const redeemResult = await inviteService.redeemCode(inviteCode, user.id);
+            if (redeemResult.success) {
+                betaAccess = {
+                    granted: true,
+                    inviteCodes: redeemResult.inviteCodes,
+                    inviteType: redeemResult.type,
+                    source: redeemResult.source
+                };
+            }
+        }
+
         res.status(201).json({
-            message: 'User registered successfully',
+            message: betaAccess
+                ? 'Welcome to the En Passant beta!'
+                : 'User registered successfully. You are on the waitlist.',
             user,
-            token
+            token,
+            betaAccess
         });
     } catch (err) {
         next(err);

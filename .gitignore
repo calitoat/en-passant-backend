@@ -39,3 +39,5 @@ Thumbs.db
 *.key
 private-key*
 .claude/settings.local.json
+*.json:Zone.Identifier
+trustbridge-485118-*.json
