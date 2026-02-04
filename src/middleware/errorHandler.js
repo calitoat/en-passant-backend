@@ -7,10 +7,8 @@
 import config from '../config/index.js';
 
 export function errorHandler(err, req, res, next) {
-    // Log error in development
-    if (config.isDevelopment) {
-        console.error('Error:', err);
-    }
+    // Always log errors (redacted in production)
+    console.error(`[Error] ${req.method} ${req.path}:`, err.message, err.stack?.split('\n')[1]?.trim());
 
     // Known error types with statusCode property
     if (err.statusCode) {
