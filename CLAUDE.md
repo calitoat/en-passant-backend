@@ -1,76 +1,69 @@
-# CLAUDE.md
+# En Passant Backend
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+> Identity verification infrastructure for the internet.
+> **Launch:** February 8, 2026 (Super Bowl LX)
 
-## Project Overview
-
-TrustBridge is an identity verification system for AI agents that solves the "bot tax" problem. It generates cryptographically signed Auth-Badges that AI agents carry to prove their operators' legitimacy.
-
-**Core concept:** Users connect identity anchors (Gmail, LinkedIn), the system calculates a Trust Score (0-100), and generates Ed25519-signed badges that platforms can verify.
-
-## Build and Development Commands
+## Quick Start
 
 ```bash
-# Install dependencies
+cd /home/placebo/enpassant-backend
 npm install
-
-# Run development server (auto-reload)
 npm run dev
-
-# Run production server
-npm start
-
-# Run database migrations
-npm run migrate
-
-# Generate Ed25519 keypair for signing
-npm run generate-keys
-
-# Run tests
-npm test
-
-# Run tests in watch mode
-npm test:watch
 ```
 
-## Architecture
+## Tech Stack
 
-### Request Flow
+- Node.js 20+ / Express 4.21
+- PostgreSQL 15+ (Neon)
+- JWT + Ed25519 cryptographic signing
+- Argon2 password hashing
+- AWS S3 + Google Cloud Vision
+
+## Project Structure
+
 ```
-Client → Express Routes → Services → Database (PostgreSQL)
-                            ↓
-                    Crypto Service (Ed25519 signing)
+src/
+├── config/     # Environment, CORS, OAuth
+├── db/         # Pool, migrations (6 total)
+├── middleware/ # Auth, validation, errors
+├── routes/     # HTTP endpoints
+├── services/   # Business logic
+└── utils/      # Helpers
 ```
 
-### Key Services
+## Key Commands
 
-- **crypto.service.js** - Ed25519 signing/verification using @noble/ed25519. All badge signatures flow through here.
-- **trustScore.service.js** - Calculates 0-100 trust scores. Scoring weights defined as constants at top of file.
-- **badge.service.js** - Badge lifecycle: generate, verify, revoke. Calls crypto and trustScore services.
-- **identity.service.js** - Manages connected identity providers. Currently supports mock data; OAuth in Phase 2.
+```bash
+npm run dev              # Watch mode
+npm run migrate          # Apply migrations
+npm run seed:superbowl   # Price ceiling data
+npm test                 # Run tests
+```
 
-### Database Schema
+## EP Score System (100 points)
 
-Four main tables:
-- `users` - Accounts with argon2-hashed passwords
-- `identity_anchors` - Connected providers (gmail, linkedin) with metadata
-- `auth_badges` - Signed badges with expiry and revocation status
-- `badge_verifications` - Audit log of verification requests
+| Anchor | Points |
+|--------|--------|
+| Base | 20 |
+| Gmail | 25 |
+| LinkedIn | 30 |
+| .edu | 25 |
 
-### Trust Score Components
+## API Routes
 
-| Component | Points | Source |
-|-----------|--------|--------|
-| Identity Age | 40 | Average age of connected accounts |
-| Activity Authenticity | 30 | Provider presence (mock), OAuth patterns (Phase 2) |
-| Network Depth | 20 | LinkedIn connection count |
-| Platform Standing | 10 | Email verified, no fraud flags |
+- `/api/auth` - Register, login, OAuth
+- `/api/badges` - Generate, verify, revoke
+- `/api/identity` - Connect/disconnect anchors
+- `/api/listings` - Ticket marketplace
+- `/api/invites` - Beta access codes
 
-Thresholds defined in `src/services/trustScore.service.js`.
+## Related Projects
 
-## Important Patterns
+- Frontend: `/home/placebo/enpassant-frontend/`
+- Extension: `/home/placebo/enpassant-extension/`
 
-- **ES Modules** - Project uses `"type": "module"` in package.json
-- **Thin routes, fat services** - Routes handle HTTP; business logic lives in services
-- **Config validation** - `src/config/index.js` throws on missing required env vars
-- **Canonical JSON** - Badge payloads serialized with sorted keys before signing
+## Deployment
+
+- **API:** Railway (api.enpassantapi.io)
+- **Frontend:** Vercel (enpassantapi.io)
+- **Database:** Neon PostgreSQL
