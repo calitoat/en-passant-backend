@@ -7,6 +7,7 @@
 
 import { Router } from 'express';
 import db from '../db/index.js';
+import { sendWaitlistConfirmation } from '../services/email.service.js';
 
 const router = Router();
 
@@ -76,6 +77,21 @@ router.post('/enlist', async (req, res) => {
         const lead = result.rows[0];
 
         console.log(`[Waitlist] New signup: ${email} (${vertical}, ${source || 'organic'})`);
+
+        // Send confirmation email (fire and forget - don't block response)
+        sendWaitlistConfirmation(email.toLowerCase().trim(), vertical)
+            .then(async (emailResult) => {
+                if (emailResult.success) {
+                    // Mark email as sent in database
+                    await db.query(
+                        'UPDATE leads SET email_sent = true, email_sent_at = NOW() WHERE id = $1',
+                        [lead.id]
+                    ).catch(err => console.error('[Waitlist] Failed to update email_sent:', err));
+                }
+            })
+            .catch(err => {
+                console.error('[Waitlist] Failed to send confirmation email:', err);
+            });
 
         res.status(201).json({
             success: true,
