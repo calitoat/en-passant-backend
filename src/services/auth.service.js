@@ -63,7 +63,7 @@ export async function register(email, password) {
  */
 export async function login(email, password) {
     const result = await db.query(
-        'SELECT id, email, password_hash, email_verified, is_active FROM users WHERE email = $1',
+        'SELECT id, email, password_hash, email_verified, is_active, has_beta_access FROM users WHERE email = $1',
         [email.toLowerCase()]
     );
 
@@ -99,7 +99,7 @@ export async function login(email, password) {
  */
 export async function getUserById(userId) {
     const result = await db.query(
-        'SELECT id, email, created_at, email_verified, is_active FROM users WHERE id = $1',
+        'SELECT id, email, created_at, email_verified, is_active, has_beta_access FROM users WHERE id = $1',
         [userId]
     );
     return result.rows[0] || null;
