@@ -30,7 +30,7 @@ const router = Router();
  */
 router.post('/register', requireFields('email', 'password'), async (req, res, next) => {
     try {
-        const { email, password, inviteCode } = req.body;
+        const { email, password, inviteCode, attribution } = req.body;
 
         // If invite code provided, validate it first (before creating user)
         let inviteValidation = null;
@@ -49,6 +49,31 @@ router.post('/register', requireFields('email', 'password'), async (req, res, ne
 
         // Generate token for immediate use
         const token = authService.generateToken(user);
+
+        // Store attribution data if provided
+        if (attribution && user.id) {
+            try {
+                const db = (await import('../db/index.js')).default;
+                await db.query(`
+                    INSERT INTO user_attribution
+                    (user_id, source, campaign, medium, content, landing_page, referrer)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7)
+                    ON CONFLICT (user_id) DO NOTHING
+                `, [
+                    user.id,
+                    attribution.source || 'direct',
+                    attribution.campaign || 'organic',
+                    attribution.medium || 'web',
+                    attribution.content || null,
+                    attribution.landing_page || null,
+                    attribution.referrer || null
+                ]);
+                console.log(`[SIGNUP] Email: ${email}, Source: ${attribution.source || 'direct'}, Campaign: ${attribution.campaign || 'organic'}`);
+            } catch (attrErr) {
+                // Don't fail registration over attribution tracking
+                console.error('[SIGNUP] Attribution save failed:', attrErr.message);
+            }
+        }
 
         // If valid invite code was provided, redeem it
         let betaAccess = null;

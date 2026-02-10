@@ -15,6 +15,7 @@ import listingsRoutes from './listings.routes.js';
 import eventsRoutes from './events.routes.js';
 import receiptsRoutes from './receipts.routes.js';
 import inviteRoutes from './invite.routes.js';
+import adminRoutes from './admin.routes.js';
 import db from '../db/index.js';
 import config from '../config/index.js';
 import { ALLOWED_ORIGINS } from '../config/cors.js';
@@ -32,6 +33,7 @@ router.use('/listings', listingsRoutes);
 router.use('/events', eventsRoutes);
 router.use('/receipts', receiptsRoutes);
 router.use('/invites', inviteRoutes);
+router.use('/admin', adminRoutes);
 
 // Enhanced health check endpoint
 router.get('/health', async (req, res) => {
